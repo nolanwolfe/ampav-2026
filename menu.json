@@ -1,0 +1,42 @@
+{
+  "cuisine": [
+    {"id": "chicken_caesar_wrap",       "name": "Chicken Caesar Wrap",               "price": 15},
+    {"id": "feta_grilled_veg",          "name": "Feta with Grilled Vegetable (V)",   "price": 15},
+    {"id": "ham_emmental",              "name": "Ham & Emmental Cheese",             "price": 15},
+    {"id": "greek_salad",               "name": "Greek Salad (V)",                   "price": 15},
+    {"id": "nicoise_salad",             "name": "Nicoise Salad",                     "price": 15},
+    {"id": "mexican_salad",             "name": "Mexican Salad",                     "price": 15},
+    {"id": "fresh_veggie_wrap",         "name": "Fresh Veggie Wrap (V)",             "price": 15},
+    {"id": "tomato_mozz_pistou",        "name": "Tomato, Mozzarella, Pistou (V)",    "price": 15},
+    {"id": "curried_chicken_salad",     "name": "Curried Chicken with Crunchy Salad","price": 15},
+    {"id": "citrus_tobbouleh",          "name": "Citrus Tobbouleh (V)",              "price": 15},
+    {"id": "caesar_salad",              "name": "Caesar Salad (V)",                  "price": 15},
+    {"id": "italian_grilled_chicken",   "name": "Italian Grilled Chicken Salad",     "price": 15},
+    {"id": "blt",                       "name": "BLT",                               "price": 15},
+    {"id": "thai_veg_salad",            "name": "Thai Vegetable Salad (V)",          "price": 15}
+  ],
+  "bar": [
+    {"id": "ampav_gin_tonic",           "name": "AmPav Gin & Tonic",                 "price": 15, "category": "COCKTAILS"},
+    {"id": "riviera_paloma",            "name": "Riviera Paloma",                    "price": 15, "category": "COCKTAILS"},
+    {"id": "azur_splash",               "name": "Azur Splash",                       "price": 15, "category": "COCKTAILS"},
+    {"id": "cannes_breeze",             "name": "Cannes Breeze",                     "price": 8,  "category": "MOCKTAIL"},
+    {"id": "sparkling_white_glass",     "name": "Sparkling White · Glass",           "price": 12, "category": "WINE"},
+    {"id": "sparkling_white_bottle",    "name": "Sparkling White · Bottle",          "price": 40, "category": "WINE"},
+    {"id": "still_white_glass",         "name": "Still White Wine · Glass",          "price": 12, "category": "WINE"},
+    {"id": "still_white_bottle",        "name": "Still White Wine · Bottle",         "price": 40, "category": "WINE"},
+    {"id": "still_rose_glass",          "name": "Still Rosé · Glass",               "price": 12, "category": "WINE"},
+    {"id": "still_rose_bottle",         "name": "Still Rosé · Bottle",              "price": 40, "category": "WINE"},
+    {"id": "still_red_glass",           "name": "Still Red Wine · Glass",            "price": 12, "category": "WINE"},
+    {"id": "still_red_bottle",          "name": "Still Red Wine · Bottle",           "price": 40, "category": "WINE"},
+    {"id": "vitus",                     "name": "Vitus",                             "price": 10, "category": "BEER"},
+    {"id": "hefeweiss",                 "name": "Hefeweiss",                         "price": 10, "category": "BEER"},
+    {"id": "original_helles",           "name": "Original Helles",                   "price": 10, "category": "BEER"},
+    {"id": "non_alc_helles",            "name": "Non-alc Original Helles",           "price": 10, "category": "BEER"},
+    {"id": "coke",                      "name": "Coke",                              "price": 4,  "category": "SODA"},
+    {"id": "coke_zero",                 "name": "Coke Zero",                         "price": 4,  "category": "SODA"},
+    {"id": "fanta_orange",              "name": "Fanta Orange",                      "price": 4,  "category": "SODA"},
+    {"id": "sprite",                    "name": "Sprite",                            "price": 4,  "category": "SODA"},
+    {"id": "perrier",                   "name": "Perrier",                           "price": 4,  "category": "SODA"},
+    {"id": "orange_juice",              "name": "Orange Juice",                      "price": 4,  "category": "SODA"}
+  ]
+}

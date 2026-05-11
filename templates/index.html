@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>American Pavilion</title>
+<style>
+  :root {
+    --bg:          #060c15;
+    --surface:     #0d1525;
+    --card:        #111e30;
+    --card-on:     #0d2218;
+    --border:      rgba(255,255,255,0.07);
+    --border-on:   #4ade80;
+    --blue:        #7dd3fc;
+    --green:       #4ade80;
+    --amber:       #fbbf24;
+    --red:         #f87171;
+    --purple:      #a78bfa;
+    --text:        #e8f0fe;
+    --muted:       #4a5a78;
+    --gold:        #d4a843;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid rgba(125,211,252,0.2);
+    padding: 15px 20px 11px;
+    text-align: center;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 1rem; font-weight: 900; color: var(--blue); letter-spacing: 0.12em; text-transform: uppercase; }
+  header p  { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.06em; margin-top: 3px; }
+
+  /* ── Menu toggle ── */
+  .menu-toggle {
+    display: flex; gap: 6px; padding: 8px 10px;
+    background: var(--surface);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    position: sticky; top: 56px; z-index: 9;
+  }
+  .tog {
+    flex: 1; padding: 9px; border: none; border-radius: 9px;
+    font-size: 0.82rem; font-weight: 700; cursor: pointer;
+    background: transparent; color: var(--muted); transition: all 0.15s;
+  }
+  .tog.active { background: var(--blue); color: #000; }
+
+  /* ── Menu grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 9px;
+    padding: 12px 10px 110px;
+  }
+  @media (max-width: 380px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .cat-header {
+    grid-column: 1 / -1;
+    font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 6px 10px; border-radius: 8px; margin-top: 4px;
+  }
+
+  /* ── Wine picker ── */
+  .wine-picker {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+    background: var(--surface);
+    border-radius: 22px 22px 0 0;
+    padding: 10px 18px 38px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  }
+  .wine-picker.show { transform: translateY(0); }
+  .wine-picker h3 { font-size: 1rem; font-weight: 800; color: #e05c52; margin-bottom: 16px; text-align: center; }
+  .wine-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .wine-opt {
+    padding: 18px 10px; border: 1.5px solid rgba(192,57,43,0.4);
+    border-radius: 13px; background: rgba(192,57,43,0.08);
+    cursor: pointer; text-align: center; transition: all 0.15s;
+  }
+  .wine-opt:active { transform: scale(0.96); }
+  .wine-opt-label { font-size: 0.9rem; font-weight: 800; color: #e8f0fe; }
+  .wine-opt-price { font-size: 0.8rem; color: #e05c52; font-weight: 700; margin-top: 4px; }
+
+  .item {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 13px;
+    padding: 16px 10px 13px;
+    cursor: pointer; user-select: none;
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center;
+    transition: border-color 0.12s, background 0.12s, transform 0.08s;
+  }
+  .item:active { transform: scale(0.94); }
+  .item.on { border-color: var(--border-on); background: var(--card-on); }
+  .item-name  { font-size: 0.82rem; font-weight: 700; line-height: 1.25; }
+  .item-price { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+  .item.on .item-price { color: var(--green); }
+
+  .badge {
+    position: absolute; top: -8px; right: -8px;
+    background: var(--green); color: #000;
+    border-radius: 50%; width: 24px; height: 24px;
+    font-size: 0.75rem; font-weight: 900;
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  }
+  .badge.show { display: flex; }
+
+  /* ── Cart bar ── */
+  .cart-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+    background: var(--blue); padding: 15px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer;
+    transform: translateY(100%);
+    transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 -4px 28px rgba(0,0,0,0.5);
+  }
+  .cart-bar.up { transform: translateY(0); }
+  .cart-bar-left  { font-size: 0.9rem; font-weight: 700; color: #000; }
+  .cart-bar-right { font-size: 1.25rem; font-weight: 900; color: #000; }
+
+  /* ── Sheet ── */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.82);
+    z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .overlay.show { opacity: 1; pointer-events: all; }
+
+  .sheet {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+    background: var(--surface);
+    border-radius: 22px 22px 0 0;
+    padding: 10px 18px 38px;
+    max-height: 92vh; overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  }
+  .sheet.show { transform: translateY(0); }
+  .handle { width: 34px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin: 12px auto 20px; }
+  .sheet h2 { font-size: 1rem; font-weight: 800; margin-bottom: 14px; color: var(--text); }
+
+  /* cart lines */
+  .line { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .line:last-of-type { border: none; }
+  .line-name  { flex: 1; font-size: 0.88rem; font-weight: 600; }
+  .line-amt   { font-size: 0.85rem; color: var(--muted); min-width: 46px; text-align: right; }
+  .qctrl { display: flex; align-items: center; gap: 7px; }
+  .qbtn {
+    width: 28px; height: 28px; border-radius: 50%; border: none;
+    background: #1a2a3f; color: var(--text);
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .qnum { font-size: 0.9rem; font-weight: 800; min-width: 16px; text-align: center; }
+
+  /* ── Modifiers ── */
+  .mod-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin: 14px 0 8px; }
+  .mods { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 14px; }
+  .mod {
+    padding: 10px 8px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.08);
+    background: var(--card); color: var(--muted);
+    font-size: 0.75rem; font-weight: 700; cursor: pointer; text-align: center;
+    transition: all 0.15s; line-height: 1.3;
+  }
+  .mod:active { transform: scale(0.96); }
+  .mod.active-blue   { border-color: var(--blue);   background: rgba(125,211,252,0.1); color: var(--blue); }
+  .mod.active-amber  { border-color: var(--amber);  background: rgba(251,191,36,0.1);  color: var(--amber); }
+  .mod.active-red    { border-color: var(--red);    background: rgba(248,113,113,0.1); color: var(--red); }
+
+  /* ── Totals ── */
+  .divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 14px 0; }
+  .subtotal-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--muted); margin-bottom: 5px; }
+  .discount-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 8px; }
+  .discount-row span:first-child { color: var(--green); }
+  .discount-row span:last-child  { color: var(--green); font-weight: 700; }
+  .total-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+  .total-row span:first-child { font-size: 0.85rem; color: var(--muted); }
+  .total-row span:last-child  { font-size: 1.55rem; font-weight: 900; color: var(--blue); }
+
+  /* ── Email ── */
+  .email-wrap { margin-bottom: 14px; }
+  .email-wrap label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 6px; }
+  .email-wrap input {
+    width: 100%; padding: 11px 13px;
+    background: var(--card); border: 1.5px solid rgba(255,255,255,0.07);
+    border-radius: 10px; color: var(--text); font-size: 0.9rem; outline: none;
+  }
+  .email-wrap input:focus { border-color: var(--blue); }
+
+  /* ── Buttons ── */
+  .btn-charge {
+    width: 100%; padding: 17px; border: none; border-radius: 13px; cursor: pointer;
+    background: var(--blue); color: #000; font-size: 1.05rem; font-weight: 900;
+    transition: opacity 0.15s;
+  }
+  .btn-charge:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-void-confirm {
+    width: 100%; padding: 17px; border: none; border-radius: 13px; cursor: pointer;
+    background: var(--red); color: #000; font-size: 1.05rem; font-weight: 900;
+    display: none;
+  }
+  .btn-abort {
+    width: 100%; padding: 12px; margin-top: 9px; border-radius: 13px; cursor: pointer;
+    background: transparent; border: 1.5px solid rgba(248,113,113,0.5); color: var(--red);
+    font-size: 0.88rem; font-weight: 600; display: none;
+  }
+
+  /* ── Status screen ── */
+  .status {
+    position: fixed; inset: 0; z-index: 50; background: var(--bg);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; padding: 40px; text-align: center;
+  }
+  .status.show { display: flex; }
+  .spin {
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.07);
+    border-top-color: var(--blue);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .s-icon  { font-size: 5rem; line-height: 1; }
+  .s-title { font-size: 1.5rem; font-weight: 800; }
+  .s-sub   { font-size: 0.88rem; color: var(--muted); max-width: 260px; line-height: 1.5; }
+  .btn-cancel-tx {
+    margin-top: 6px; padding: 12px 30px;
+    background: transparent; border: 1.5px solid rgba(248,113,113,0.5);
+    border-radius: 12px; color: var(--red); font-size: 0.88rem; font-weight: 600; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>American Pavilion</h1>
+  <p>Cannes Film Festival &nbsp;·&nbsp; POS Terminal</p>
+</header>
+
+<div class="menu-toggle">
+  <button id="tog-cuisine" class="tog active" onclick="switchMenu('cuisine')">Cuisine Menu</button>
+  <button id="tog-bar"     class="tog"        onclick="switchMenu('bar')">Bar Menu</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="cart-bar" id="cartBar" onclick="openSheet()">
+  <div class="cart-bar-left">🛒 <span id="cartCount">0</span> items</div>
+  <div class="cart-bar-right">€<span id="cartTotal">0.00</span> →</div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="handle" onclick="closeSheet()" style="cursor:pointer; padding: 10px 0; margin: 0 auto 12px;"></div>
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+    <h2 style="margin:0">Order</h2>
+    <button onclick="closeSheet()" style="background:none; border:none; color:#4a5a78; font-size:1.5rem; cursor:pointer; line-height:1; padding:4px 8px;">✕</button>
+  </div>
+  <div id="lines"></div>
+
+  <div class="mod-label">Modifiers</div>
+  <div class="mods">
+    <div class="mod" id="mod-s20"  onclick="toggleMod('student20')">Student Discount<br>20% off</div>
+    <div class="mod" id="mod-dos"  onclick="toggleMod('dayold')">Day Old Sandwich<br>50% off</div>
+    <div class="mod" id="mod-void" onclick="toggleMod('void')">Staff Void<br>€0.00</div>
+  </div>
+
+  <hr class="divider">
+  <div class="subtotal-row" id="subtotalRow" style="display:none"><span>Subtotal</span><span id="subtotalAmt"></span></div>
+  <div class="discount-row" id="discountRow" style="display:none"><span id="discountLabel"></span><span id="discountAmt"></span></div>
+  <div class="total-row"><span>Total</span><span>€<span id="sheetTotal">0.00</span></span></div>
+
+  <div class="email-wrap">
+    <label>Email receipt &nbsp;(optional)</label>
+    <input type="email" id="email" placeholder="customer@email.com" inputmode="email">
+  </div>
+
+  <div class="email-wrap">
+    <label>Reader</label>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px;">
+      {% for key, r in readers.items() %}
+      <div class="mod {% if loop.first %}active-blue{% endif %}" id="reader_{{ key }}" onclick="selectReader('{{ key }}')">{{ r.label }}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <button class="btn-charge"       id="chargeBtn"      onclick="doCharge()">Charge on Reader →</button>
+  <button class="btn-void-confirm" id="voidConfirmBtn" onclick="doVoid()">Confirm Staff Void (€0)</button>
+  <button class="btn-abort"        id="cancelBtn"      onclick="cancelTx()">Cancel Transaction</button>
+</div>
+
+<div class="overlay" id="wineOverlay" onclick="closeWinePicker()"></div>
+<div class="wine-picker" id="winePicker">
+  <div class="handle"></div>
+  <h3 id="winePickerTitle"></h3>
+  <div class="wine-opts">
+    <div class="wine-opt" onclick="addWine('glass')">
+      <div class="wine-opt-label">Glass</div>
+      <div class="wine-opt-price">€12</div>
+    </div>
+    <div class="wine-opt" onclick="addWine('bottle')">
+      <div class="wine-opt-label">Bottle</div>
+      <div class="wine-opt-price">€40</div>
+    </div>
+  </div>
+</div>
+
+<div class="status" id="statusScreen">
+  <div id="sIcon" class="spin"></div>
+  <div class="s-title" id="sTitle">Waiting for card…</div>
+  <div class="s-sub"   id="sSub">Ask customer to tap or insert card on the reader</div>
+  <button class="btn-cancel-tx" id="abortBtn" onclick="cancelTx()">Cancel</button>
+</div>
+
+<script>
+const CUISINE_ITEMS = {{ cuisine_items | tojson }};
+const BAR_ITEMS     = {{ bar_items | tojson }};
+const ALL_ITEMS     = [...CUISINE_ITEMS, ...BAR_ITEMS];
+const BASE          = '{{ base_url }}';
+
+const CAT_COLORS = {
+  'COCKTAILS': { border: '#2d9d9d', bg: 'rgba(45,157,157,0.12)',  text: '#2d9d9d' },
+  'MOCKTAIL':  { border: '#d4a843', bg: 'rgba(212,168,67,0.12)',   text: '#d4a843' },
+  'WINE':      { border: '#c0392b', bg: 'rgba(192,57,43,0.12)',    text: '#e05c52' },
+  'BEER':      { border: '#e67e22', bg: 'rgba(230,126,34,0.12)',   text: '#e67e22' },
+  'SODA':      { border: '#27ae60', bg: 'rgba(39,174,96,0.12)',    text: '#27ae60' },
+};
+
+const WINE_BASES = [
+  { name: 'Sparkling White', glass: 'sparkling_white_glass', bottle: 'sparkling_white_bottle' },
+  { name: 'Still White Wine', glass: 'still_white_glass',   bottle: 'still_white_bottle' },
+  { name: 'Still Rosé',      glass: 'still_rose_glass',     bottle: 'still_rose_bottle' },
+  { name: 'Still Red Wine',  glass: 'still_red_glass',      bottle: 'still_red_bottle' },
+];
+const WINE_IDS = new Set(WINE_BASES.flatMap(w => [w.glass, w.bottle]));
+
+let cart           = {};
+let modifier       = null;
+let currentPI      = null;
+let pollTimer      = null;
+let activeMenu     = 'cuisine';
+let wineTarget     = null;
+let selectedReader = 'r1';
+
+function selectReader(key) {
+  selectedReader = key;
+  document.querySelectorAll('[id^="reader_"]').forEach(el => {
+    el.className = 'mod' + (el.id === 'reader_' + key ? ' active-blue' : '');
+  });
+}
+
+const MODS = {
+  student20: { label: 'Student Discount 20%', pct: 0.20, cls: 'active-blue',  el: 'mod-s20'  },
+  dayold:    { label: 'Day Old Sandwich 50%', pct: 0.50, cls: 'active-amber', el: 'mod-dos'  },
+  void:      { label: 'Staff Void',           pct: 1.00, cls: 'active-red',   el: 'mod-void' },
+};
+
+function switchMenu(menu) {
+  activeMenu = menu;
+  document.getElementById('tog-cuisine').className = 'tog' + (menu === 'cuisine' ? ' active' : '');
+  document.getElementById('tog-bar').className     = 'tog' + (menu === 'bar'     ? ' active' : '');
+  buildGrid();
+  refresh();
+}
+
+function buildGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  if (activeMenu === 'cuisine') {
+    CUISINE_ITEMS.forEach(item => addItemCard(item, grid));
+  } else {
+    let lastCat = null;
+    let wineRendered = false;
+    BAR_ITEMS.forEach(item => {
+      if (item.category !== lastCat) {
+        const c = CAT_COLORS[item.category] || {};
+        const hdr = document.createElement('div');
+        hdr.className = 'cat-header';
+        hdr.style.color      = c.text  || '#fff';
+        hdr.style.background = c.bg    || 'transparent';
+        hdr.textContent = item.category;
+        grid.appendChild(hdr);
+        lastCat = item.category;
+        wineRendered = false;
+      }
+      if (item.category === 'WINE') {
+        if (!wineRendered) {
+          WINE_BASES.forEach(wb => addWineCard(wb, grid));
+          wineRendered = true;
+        }
+      } else {
+        addItemCard(item, grid);
+      }
+    });
+  }
+}
+
+function addWineCard(wineBase, grid) {
+  const c = CAT_COLORS['WINE'];
+  const el = document.createElement('div');
+  el.className = 'item';
+  el.id = 'winecard_' + wineBase.glass.replace('_glass','');
+  el.style.borderColor = c.border;
+  el.style.background  = c.bg;
+  el.innerHTML = `
+    <div class="item-name">${wineBase.name}</div>
+    <div class="item-price" style="color:#e05c52">Glass · Bottle</div>
+  `;
+  el.onclick = () => openWinePicker(wineBase);
+  grid.appendChild(el);
+}
+
+function openWinePicker(wineBase) {
+  wineTarget = wineBase;
+  document.getElementById('winePickerTitle').textContent = wineBase.name;
+  document.getElementById('wineOverlay').className = 'overlay show';
+  document.getElementById('winePicker').className  = 'wine-picker show';
+}
+
+function closeWinePicker() {
+  wineTarget = null;
+  document.getElementById('wineOverlay').className = 'overlay';
+  document.getElementById('winePicker').className  = 'wine-picker';
+}
+
+function addWine(size) {
+  if (!wineTarget) return;
+  const item = ALL_ITEMS.find(i => i.id === wineTarget[size]);
+  if (item) add(item);
+  closeWinePicker();
+}
+
+function addItemCard(item, grid) {
+  const el = document.createElement('div');
+  el.className = 'item';
+  el.id = 'item_' + item.id;
+  if (item.category) {
+    const c = CAT_COLORS[item.category];
+    if (c) { el.style.borderColor = c.border; el.style.background = c.bg; }
+  }
+  el.innerHTML = `
+    <div class="badge" id="badge_${item.id}">0</div>
+    <div class="item-name">${item.name}</div>
+    <div class="item-price">€${item.price.toFixed(2)}</div>
+  `;
+  el.onclick = () => add(item);
+  grid.appendChild(el);
+}
+
+buildGrid();
+
+function add(item) {
+  if (!cart[item.id]) cart[item.id] = { name: item.name, price: item.price, qty: 0 };
+  cart[item.id].qty++;
+  refresh();
+}
+
+function setQty(id, delta) {
+  if (!cart[id]) return;
+  cart[id].qty += delta;
+  if (cart[id].qty <= 0) delete cart[id];
+  refresh();
+  renderLines();
+}
+
+function refresh() {
+  const entries    = Object.entries(cart);
+  const qty        = entries.reduce((s,[,v]) => s + v.qty, 0);
+  const subtotal   = entries.reduce((s,[,v]) => s + v.price * v.qty, 0);
+  const discountPct = modifier ? MODS[modifier].pct : 0;
+  const total      = modifier === 'void' ? 0 : subtotal * (1 - discountPct);
+
+  document.getElementById('cartCount').textContent  = qty;
+  document.getElementById('cartTotal').textContent  = total.toFixed(2);
+  document.getElementById('sheetTotal').textContent = total.toFixed(2);
+  document.getElementById('cartBar').className      = 'cart-bar' + (qty > 0 ? ' up' : '');
+
+  // subtotal / discount rows
+  const hasDiscount = modifier && discountPct > 0;
+  document.getElementById('subtotalRow').style.display  = hasDiscount ? 'flex' : 'none';
+  document.getElementById('discountRow').style.display  = hasDiscount ? 'flex' : 'none';
+  if (hasDiscount) {
+    document.getElementById('subtotalAmt').textContent  = '€' + subtotal.toFixed(2);
+    document.getElementById('discountLabel').textContent = MODS[modifier].label;
+    document.getElementById('discountAmt').textContent  = modifier === 'void' ? '−€' + subtotal.toFixed(2) : '−€' + (subtotal * discountPct).toFixed(2);
+  }
+
+  // void vs charge button
+  document.getElementById('chargeBtn').style.display      = modifier === 'void' ? 'none' : 'block';
+  document.getElementById('voidConfirmBtn').style.display = modifier === 'void' ? 'block' : 'none';
+
+  // badges
+  ALL_ITEMS.forEach(item => {
+    if (WINE_IDS.has(item.id)) return;
+    const q     = cart[item.id]?.qty || 0;
+    const badge = document.getElementById('badge_' + item.id);
+    const card  = document.getElementById('item_'  + item.id);
+    if (badge) { badge.textContent = q; badge.className = 'badge' + (q > 0 ? ' show' : ''); }
+    if (card)  { card.className    = 'item'  + (q > 0 ? ' on'   : ''); }
+  });
+}
+
+function renderLines() {
+  const el = document.getElementById('lines');
+  el.innerHTML = '';
+  for (const [id, v] of Object.entries(cart)) {
+    const div = document.createElement('div');
+    div.className = 'line';
+    div.innerHTML = `
+      <div class="line-name">${v.name}</div>
+      <div class="qctrl">
+        <button class="qbtn" onclick="setQty('${id}',-1)">−</button>
+        <div class="qnum">${v.qty}</div>
+        <button class="qbtn" onclick="setQty('${id}',1)">+</button>
+      </div>
+      <div class="line-amt">€${(v.price * v.qty).toFixed(2)}</div>
+    `;
+    el.appendChild(div);
+  }
+}
+
+function toggleMod(key) {
+  modifier = modifier === key ? null : key;
+  Object.entries(MODS).forEach(([k, m]) => {
+    document.getElementById(m.el).className = 'mod' + (modifier === k ? ' ' + m.cls : '');
+  });
+  refresh();
+}
+
+function openSheet() {
+  if (!Object.keys(cart).length) return;
+  renderLines(); refresh();
+  document.getElementById('overlay').className = 'overlay show';
+  document.getElementById('sheet').className   = 'sheet show';
+}
+
+function closeSheet() {
+  document.getElementById('overlay').className = 'overlay';
+  document.getElementById('sheet').className   = 'sheet';
+}
+
+function getTotal() {
+  const subtotal    = Object.values(cart).reduce((s,v) => s + v.price * v.qty, 0);
+  const discountPct = modifier ? MODS[modifier].pct : 0;
+  return modifier === 'void' ? 0 : subtotal * (1 - discountPct);
+}
+
+async function doCharge() {
+  const items = Object.entries(cart).map(([id,v]) => ({ id, name: v.name, price: v.price, qty: v.qty }));
+  const email = document.getElementById('email').value.trim();
+  const total_cents = Math.round(getTotal() * 100);
+  const discount_label = modifier ? MODS[modifier].label : null;
+
+  document.getElementById('chargeBtn').disabled = true;
+  closeSheet();
+  showStatus('waiting');
+
+  try {
+    const res = await fetch(BASE + '/charge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, email, total_cents, discount_label, reader_key: selectedReader }),
+    });
+    const data = await res.json();
+    if (data.error) { showStatus('fail', data.error); return; }
+    currentPI = data.payment_intent_id;
+    document.getElementById('cancelBtn').style.display = 'block';
+    document.getElementById('abortBtn').style.display  = 'block';
+    pollTimer = setInterval(doPoll, 2000);
+  } catch(e) {
+    showStatus('fail', 'Network error');
+  }
+}
+
+async function doVoid() {
+  const items = Object.entries(cart).map(([id,v]) => ({ id, name: v.name, price: v.price, qty: v.qty }));
+  closeSheet();
+  await fetch(BASE + '/void', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items }),
+  });
+  showStatus('voided');
+  setTimeout(() => { hideStatus(); reset(); }, 2500);
+}
+
+async function doPoll() {
+  if (!currentPI) return;
+  try {
+    const res = await fetch(BASE + '/status/' + currentPI);
+    const { intent_status } = await res.json();
+    if (intent_status === 'succeeded') {
+      clearInterval(pollTimer);
+      showStatus('ok');
+      setTimeout(() => { hideStatus(); reset(); }, 3000);
+    } else if (['canceled','failed'].includes(intent_status)) {
+      clearInterval(pollTimer);
+      showStatus('fail', 'Payment ' + intent_status);
+    }
+  } catch(e) {}
+}
+
+async function cancelTx() {
+  if (!currentPI) return;
+  clearInterval(pollTimer);
+  await fetch(BASE + '/cancel/' + currentPI, { method: 'POST' });
+  hideStatus();
+  document.getElementById('chargeBtn').disabled = false;
+  document.getElementById('cancelBtn').style.display = 'none';
+  openSheet();
+}
+
+function showStatus(type, msg) {
+  const icon  = document.getElementById('sIcon');
+  const title = document.getElementById('sTitle');
+  const sub   = document.getElementById('sSub');
+  const abort = document.getElementById('abortBtn');
+  document.getElementById('statusScreen').className = 'status show';
+
+  if (type === 'waiting') {
+    icon.className = 'spin'; icon.textContent = ''; icon.style.color = '';
+    title.textContent = 'Waiting for card…';
+    sub.textContent   = 'Ask customer to tap or insert card on the reader';
+    abort.style.display = 'block';
+  } else if (type === 'ok') {
+    icon.className = 's-icon'; icon.style.color = '#4ade80'; icon.textContent = '✓';
+    title.textContent = 'Payment Accepted';
+    sub.textContent   = 'Transaction complete';
+    abort.style.display = 'none';
+  } else if (type === 'voided') {
+    icon.className = 's-icon'; icon.style.color = '#f87171'; icon.textContent = '∅';
+    title.textContent = 'Order Voided';
+    sub.textContent   = 'Recorded as staff void — no charge';
+    abort.style.display = 'none';
+  } else {
+    icon.className = 's-icon'; icon.style.color = '#f87171'; icon.textContent = '✗';
+    title.textContent = msg || 'Payment Failed';
+    sub.textContent   = 'Please try again';
+    abort.style.display = 'none';
+    setTimeout(hideStatus, 3000);
+  }
+}
+
+function hideStatus() {
+  document.getElementById('statusScreen').className = 'status';
+  document.getElementById('chargeBtn').disabled     = false;
+  document.getElementById('cancelBtn').style.display = 'none';
+  document.getElementById('abortBtn').style.display  = 'none';
+}
+
+function reset() {
+  cart = {}; currentPI = null; modifier = null;
+  document.getElementById('email').value = '';
+  Object.values(MODS).forEach(m => { document.getElementById(m.el).className = 'mod'; });
+  refresh(); renderLines();
+}
+</script>
+</body>
+</html>

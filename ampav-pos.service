@@ -1,0 +1,14 @@
+[Unit]
+Description=American Pavilion POS
+After=network.target
+
+[Service]
+User=jef
+WorkingDirectory=/home/jef/stripe-pos
+ExecStart=/home/jef/stripe-pos/venv/bin/gunicorn -w 2 -b 0.0.0.0:5000 app:app
+Restart=always
+RestartSec=5
+EnvironmentFile=/home/jef/stripe-pos/.env
+
+[Install]
+WantedBy=multi-user.target

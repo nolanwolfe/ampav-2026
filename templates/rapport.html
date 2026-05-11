@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rapport — Restaurant at the American Pavilion</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #060c15; color: #e8f0fe; padding: 24px 18px 60px; max-width: 960px; margin: 0 auto; }
+h1   { color: #7dd3fc; font-size: 1.5rem; font-weight: 900; }
+
+.day-nav { display: flex; align-items: center; gap: 12px; margin: 0 0 26px; }
+.day-nav a { color: #7dd3fc; font-size: 1.2rem; font-weight: 900; text-decoration: none; padding: 4px 10px; background: #0d1525; border-radius: 8px; line-height: 1; }
+.day-nav a:hover { background: #1a2a3f; }
+.day-nav input[type=date] { background: #0d1525; border: 1px solid rgba(255,255,255,0.07); color: #e8f0fe; border-radius: 8px; padding: 6px 10px; font-size: 0.9rem; cursor: pointer; }
+.day-nav input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1); }
+.day-nav .today-badge { font-size: 0.7rem; background: rgba(125,211,252,0.12); color: #7dd3fc; padding: 3px 9px; border-radius: 20px; font-weight: 700; }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+@media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+.stat { background: #0d1525; border-radius: 13px; padding: 18px 16px; }
+.stat-label { font-size: 0.65rem; color: #4a5a78; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 7px; }
+.stat-value { font-size: 1.8rem; font-weight: 900; color: #7dd3fc; line-height: 1.1; }
+.stat-value.red { color: #f87171; }
+.stat-value.fav { font-size: 1rem; padding-top: 6px; }
+
+.actions { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+a.btn     { padding: 9px 18px; background: #7dd3fc; color: #000; font-weight: 700; border-radius: 9px; text-decoration: none; font-size: 0.85rem; }
+a.btn-sec { padding: 9px 18px; background: #0d1525; color: #e8f0fe; font-weight: 600; border-radius: 9px; text-decoration: none; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.07); }
+
+.card { background: #0d1525; border-radius: 13px; padding: 18px; margin-bottom: 18px; }
+.card h2 { font-size: 0.72rem; font-weight: 700; color: #7dd3fc; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+
+.irow { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.irow:last-child { border: none; }
+.irow-name { min-width: 200px; font-size: 0.88rem; }
+.bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; }
+.bar { height: 100%; background: #7dd3fc; border-radius: 3px; }
+.irow-qty { min-width: 30px; text-align: right; font-weight: 800; font-size: 0.88rem; color: #7dd3fc; }
+.irow-rev { min-width: 56px; text-align: right; font-size: 0.8rem; color: #4a5a78; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+th { text-align: left; padding: 7px 8px; border-bottom: 1px solid rgba(255,255,255,0.07); color: #4a5a78; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; }
+td { padding: 9px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+tr:last-child td { border: none; }
+
+.items-detail { color: #4a5a78; font-size: 0.78rem; margin-top: 2px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 700; white-space: nowrap; }
+.b-succeeded { background: rgba(74,222,128,0.12);  color: #4ade80; }
+.b-voided    { background: rgba(248,113,113,0.12); color: #f87171; }
+.b-canceled  { background: rgba(248,113,113,0.10); color: #f87171; }
+.b-processing{ background: rgba(125,211,252,0.12); color: #7dd3fc; }
+.b-failed    { background: rgba(248,113,113,0.12); color: #f87171; }
+.disc-tag { display: inline-block; padding: 1px 7px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; background: rgba(251,191,36,0.12); color: #fbbf24; margin-left: 5px; }
+.empty { color: #4a5a78; font-style: italic; font-size: 0.88rem; padding: 8px 0; }
+</style>
+</head>
+<body>
+
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:26px;">
+  <div>
+    <h1>Rapport</h1>
+    <p style="color:#4a5a78; font-size:0.78rem; margin-top:4px;">Restaurant at the American Pavilion · Presented by IndieWire</p>
+  </div>
+  <img src="https://www.ampav.com/wp-content/themes/Ampav_wp/images/am-pav-iw.svg" alt="American Pavilion" style="height:48px;">
+</div>
+
+<div class="day-nav">
+  <a href="?date={{ prev_date }}">&#8592;</a>
+  <form method="get" style="display:inline">
+    <input type="date" name="date" value="{{ selected_date }}" onchange="this.form.submit()">
+  </form>
+  {% if not is_today %}
+    <a href="?date={{ next_date }}">&#8594;</a>
+  {% endif %}
+  {% if is_today %}<span class="today-badge">Today</span>{% endif %}
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-label">Transactions</div>
+    <div class="stat-value">{{ count }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Voids</div>
+    <div class="stat-value red">{{ voided_today }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Revenue</div>
+    <div class="stat-value">€{{ "%.2f"|format(total_eur) }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Favourite Item</div>
+    <div class="stat-value fav">{{ fav_item }}</div>
+  </div>
+</div>
+
+<div class="actions">
+  <a href="{{ base_url }}/export.csv" class="btn">⬇ Export CSV</a>
+  <a href="https://ampav.timaeus.ai" class="btn-sec">← Back to POS</a>
+</div>
+
+<div class="card">
+  <h2>Items Sold</h2>
+  {% if item_counts %}
+    {% set max_qty = item_counts[0][1].qty %}
+    {% for name, data in item_counts %}
+    <div class="irow">
+      <span class="irow-name">{{ name }}</span>
+      <div class="bar-wrap"><div class="bar" style="width:{{ (data.qty / max_qty * 100)|int }}%"></div></div>
+      <span class="irow-qty">× {{ data.qty }}</span>
+      <span class="irow-rev">€{{ "%.2f"|format(data.revenue) }}</span>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty">No sales recorded for this day.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Transactions</h2>
+  {% if recent %}
+  <table>
+    <thead>
+      <tr><th>#</th><th>Time</th><th>Order</th><th>Total</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+    {% for r in recent %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td style="white-space:nowrap">{{ r.time }}</td>
+      <td>
+        {% for line in r.lines %}
+          <span>{{ line.qty }}× {{ line.name }}</span>{% if not loop.last %}, {% endif %}
+        {% endfor %}
+        {% if r.discount %}<span class="disc-tag">{{ r.discount }}</span>{% endif %}
+        {% if r.email %}<div class="items-detail">{{ r.email }}</div>{% endif %}
+      </td>
+      <td style="font-weight:800;white-space:nowrap">€{{ "%.2f"|format(r.total) }}</td>
+      <td><span class="badge b-{{ r.status }}">{{ r.status }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="empty">No transactions for this day.</p>
+  {% endif %}
+</div>
+
+</body>
+</html>
