@@ -203,7 +203,6 @@ def cancel(pi_id):
 # ── Rapport ───────────────────────────────────────────────
 
 @app.route("/rapport")
-@require_admin
 def rapport():
     from datetime import timedelta
     db = get_db()
