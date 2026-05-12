@@ -460,8 +460,11 @@ function addItemCard(item, grid) {
 buildGrid();
 
 function add(item) {
-  if (!cart[item.id]) cart[item.id] = { name: item.name, price: item.price, qty: 0 };
-  cart[item.id].qty++;
+  if (cart[item.id] && cart[item.id].qty > 0) {
+    delete cart[item.id];
+  } else {
+    cart[item.id] = { name: item.name, price: item.price, qty: 1 };
+  }
   refresh();
 }
 
