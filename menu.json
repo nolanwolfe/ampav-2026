@@ -39,6 +39,7 @@
     {"id": "fanta_orange",              "name": "Fanta Orange",                      "price": 4,  "category": "SODA"},
     {"id": "sprite",                    "name": "Sprite",                            "price": 4,  "category": "SODA"},
     {"id": "perrier",                   "name": "Perrier",                           "price": 4,  "category": "SODA"},
-    {"id": "orange_juice",              "name": "Orange Juice",                      "price": 4,  "category": "SODA"}
+    {"id": "orange_juice",              "name": "Orange Juice",                      "price": 4,  "category": "SODA"},
+    {"id": "water",                     "name": "Water",                             "price": 3,  "category": "SODA"}
   ]
 }
