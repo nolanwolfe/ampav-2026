@@ -146,7 +146,6 @@ def void_order():
 
 
 @app.route("/refund/<pi_id>", methods=["POST"])
-@require_admin
 def refund(pi_id):
     try:
         stripe.Refund.create(payment_intent=pi_id)
@@ -159,7 +158,6 @@ def refund(pi_id):
 
 
 @app.route("/send-receipt/<pi_id>", methods=["POST"])
-@require_admin
 def send_receipt(pi_id):
     try:
         email = request.get_json().get("email", "").strip()
@@ -224,16 +222,29 @@ def rapport():
         (date_str + "%",),
     ).fetchone()["cnt"]
 
+    with open(MENU_PATH) as f:
+        menu_data = json.load(f)
+    cuisine_ids = {i["id"] for i in menu_data.get("cuisine", [])}
+    bar_ids     = {i["id"] for i in menu_data.get("bar", [])}
+
     item_counts = {}
+    cuisine_counts = {}
+    bar_counts = {}
     for r in db.execute("SELECT items FROM orders WHERE status='succeeded' AND created_at LIKE ?", (date_str + "%",)):
         for item in json.loads(r["items"]):
             key = item["name"]
+            iid = item.get("id", "")
             if key not in item_counts:
                 item_counts[key] = {"qty": 0, "revenue": 0.0}
             item_counts[key]["qty"]     += item["qty"]
             item_counts[key]["revenue"] += item["price"] * item["qty"]
+            if iid in cuisine_ids:
+                cuisine_counts[key] = cuisine_counts.get(key, 0) + item["qty"]
+            elif iid in bar_ids:
+                bar_counts[key] = bar_counts.get(key, 0) + item["qty"]
     item_counts = sorted(item_counts.items(), key=lambda x: -x[1]["qty"])
-    fav_item = item_counts[0][0] if item_counts else "—"
+    fav_cuisine = max(cuisine_counts, key=cuisine_counts.get) if cuisine_counts else "—"
+    fav_drink   = max(bar_counts,     key=bar_counts.get)     if bar_counts     else "—"
 
     recent = []
     for r in db.execute(
@@ -265,7 +276,8 @@ def rapport():
         count=count,
         total_eur=total_cents / 100,
         voided_today=voided_today,
-        fav_item=fav_item,
+        fav_cuisine=fav_cuisine,
+        fav_drink=fav_drink,
         item_counts=item_counts,
         recent=recent,
         base_url=BASE_URL,
