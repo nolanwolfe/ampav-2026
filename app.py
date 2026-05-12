@@ -158,6 +158,22 @@ def refund(pi_id):
         return jsonify(error=str(e)), 400
 
 
+@app.route("/send-receipt/<pi_id>", methods=["POST"])
+@require_admin
+def send_receipt(pi_id):
+    try:
+        email = request.get_json().get("email", "").strip()
+        if not email:
+            return jsonify(error="Email required"), 400
+        intent = stripe.PaymentIntent.retrieve(pi_id, expand=["latest_charge"])
+        charge_id = intent.latest_charge.id
+        stripe.Charge.modify(charge_id, receipt_email=email)
+        stripe.Charge.send_receipt(charge_id)
+        return jsonify(status="sent")
+    except stripe.error.StripeError as e:
+        return jsonify(error=str(e)), 400
+
+
 @app.route("/status/<pi_id>")
 def status(pi_id):
     intent = stripe.PaymentIntent.retrieve(pi_id)

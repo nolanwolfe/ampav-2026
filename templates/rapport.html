@@ -54,6 +54,11 @@ tr:last-child td { border: none; }
 .b-refunded  { background: rgba(167,139,250,0.12); color: #a78bfa; }
 .btn-refund  { padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(248,113,113,0.3); background: transparent; color: #f87171; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
 .btn-refund:hover { background: rgba(248,113,113,0.1); }
+.btn-receipt { padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(125,211,252,0.3); background: transparent; color: #7dd3fc; font-size: 0.68rem; font-weight: 700; cursor: pointer; margin-top: 4px; }
+.btn-receipt:hover { background: rgba(125,211,252,0.1); }
+.receipt-form { display:none; margin-top:6px; }
+.receipt-form input { padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: #060c15; color: #e8f0fe; font-size: 0.75rem; width: 150px; }
+.receipt-form button { padding: 4px 8px; border-radius: 6px; border: none; background: #7dd3fc; color: #000; font-size: 0.72rem; font-weight: 700; cursor: pointer; margin-left: 4px; }
 .disc-tag { display: inline-block; padding: 1px 7px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; background: rgba(251,191,36,0.12); color: #fbbf24; margin-left: 5px; }
 .empty { color: #4a5a78; font-style: italic; font-size: 0.88rem; padding: 8px 0; }
 </style>
@@ -142,8 +147,16 @@ tr:last-child td { border: none; }
       <td style="font-weight:800;white-space:nowrap">€{{ "%.2f"|format(r.total) }}</td>
       <td><span class="badge b-{{ r.status }}">{{ r.status }}</span></td>
       <td>
-        {% if r.status == 'succeeded' %}
-        <button class="btn-refund" onclick="doRefund('{{ r.pi_id }}', this)">Refund</button>
+        {% if r.status == 'succeeded' or r.status == 'refunded' %}
+        <button class="btn-refund" onclick="doRefund('{{ r.pi_id }}', this)" {% if r.status == 'refunded' %}style="display:none"{% endif %}>Refund</button>
+        {% endif %}
+        {% if r.status == 'succeeded' or r.status == 'refunded' %}
+        <br>
+        <button class="btn-receipt" onclick="toggleReceipt(this)">Receipt</button>
+        <div class="receipt-form">
+          <input type="email" placeholder="email@example.com">
+          <button onclick="doSendReceipt('{{ r.pi_id }}', this)">Send</button>
+        </div>
         {% endif %}
       </td>
     </tr>
@@ -156,6 +169,34 @@ tr:last-child td { border: none; }
 </div>
 
 <script>
+function toggleReceipt(btn) {
+  const form = btn.nextElementSibling;
+  form.style.display = form.style.display === 'block' ? 'none' : 'block';
+}
+
+async function doSendReceipt(piId, btn) {
+  const input = btn.previousElementSibling;
+  const email = input.value.trim();
+  if (!email) { input.focus(); return; }
+  btn.textContent = '…';
+  btn.disabled = true;
+  const res = await fetch('/send-receipt/' + piId, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json();
+  if (data.status === 'sent') {
+    btn.textContent = 'Sent ✓';
+    btn.style.background = '#4ade80';
+    setTimeout(() => { btn.closest('.receipt-form').style.display = 'none'; btn.textContent = 'Send'; btn.disabled = false; btn.style.background = ''; }, 2000);
+  } else {
+    btn.textContent = 'Error';
+    btn.disabled = false;
+    alert(data.error || 'Failed to send');
+  }
+}
+
 async function doRefund(piId, btn) {
   if (!confirm('Refund this transaction? This cannot be undone.')) return;
   btn.disabled = true;
