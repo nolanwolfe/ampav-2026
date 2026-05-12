@@ -222,7 +222,7 @@ def rapport():
 
     recent = []
     for r in db.execute(
-        "SELECT id, created_at, total_cents, discount_label, customer_email, status, items FROM orders WHERE created_at LIKE ? ORDER BY id DESC",
+        "SELECT id, payment_intent_id, created_at, total_cents, discount_label, customer_email, status, items FROM orders WHERE created_at LIKE ? ORDER BY id DESC",
         (date_str + "%",),
     ):
         lines = [{"name": i["name"], "qty": i["qty"], "price": i["price"]} for i in json.loads(r["items"])]
