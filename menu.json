@@ -3,17 +3,17 @@
     {"id": "chicken_caesar_wrap",       "name": "Chicken Caesar Wrap",               "price": 15},
     {"id": "feta_grilled_veg",          "name": "Feta with Grilled Vegetable (V)",   "price": 15},
     {"id": "ham_emmental",              "name": "Ham & Emmental Cheese",             "price": 15},
-    {"id": "greek_salad",               "name": "Greek Salad (V)",                   "price": 10},
-    {"id": "nicoise_salad",             "name": "Nicoise Salad",                     "price": 10},
-    {"id": "mexican_salad",             "name": "Mexican Salad",                     "price": 10},
+    {"id": "greek_salad",               "name": "Greek Salad (V)",                   "price": 7},
+    {"id": "nicoise_salad",             "name": "Nicoise Salad",                     "price": 7},
+    {"id": "mexican_salad",             "name": "Mexican Salad",                     "price": 7},
     {"id": "fresh_veggie_wrap",         "name": "Fresh Veggie Wrap (V)",             "price": 15},
     {"id": "tomato_mozz_pistou",        "name": "Tomato, Mozzarella, Pistou (V)",    "price": 15},
-    {"id": "curried_chicken_salad",     "name": "Curried Chicken with Crunchy Salad","price": 10},
-    {"id": "citrus_tobbouleh",          "name": "Citrus Tobbouleh (V)",              "price": 10},
-    {"id": "caesar_salad",              "name": "Caesar Salad (V)",                  "price": 10},
-    {"id": "italian_grilled_chicken",   "name": "Italian Grilled Chicken Salad",     "price": 10},
+    {"id": "curried_chicken_salad",     "name": "Curried Chicken with Crunchy Salad","price": 7},
+    {"id": "citrus_tobbouleh",          "name": "Citrus Tobbouleh (V)",              "price": 7},
+    {"id": "caesar_salad",              "name": "Caesar Salad (V)",                  "price": 7},
+    {"id": "italian_grilled_chicken",   "name": "Italian Grilled Chicken Salad",     "price": 7},
     {"id": "blt",                       "name": "BLT",                               "price": 15},
-    {"id": "thai_veg_salad",            "name": "Thai Vegetable Salad (V)",          "price": 10},
+    {"id": "thai_veg_salad",            "name": "Thai Vegetable Salad (V)",          "price": 7},
     {"id": "cookie",                    "name": "Cookie",                            "price": 4},
     {"id": "chips",                     "name": "Chips",                             "price": 5}
   ],
@@ -40,6 +40,7 @@
     {"id": "sprite",                    "name": "Sprite",                            "price": 4,  "category": "SODA"},
     {"id": "perrier",                   "name": "Perrier",                           "price": 4,  "category": "SODA"},
     {"id": "orange_juice",              "name": "Orange Juice",                      "price": 4,  "category": "SODA"},
-    {"id": "water",                     "name": "Water",                             "price": 3,  "category": "SODA"}
+    {"id": "water",                     "name": "Water",                             "price": 3,  "category": "SODA"},
+    {"id": "schweppes",                 "name": "Schweppes",                         "price": 4,  "category": "SODA"}
   ]
 }
