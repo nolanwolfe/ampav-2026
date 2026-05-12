@@ -51,6 +51,9 @@ tr:last-child td { border: none; }
 .b-canceled  { background: rgba(248,113,113,0.10); color: #f87171; }
 .b-processing{ background: rgba(125,211,252,0.12); color: #7dd3fc; }
 .b-failed    { background: rgba(248,113,113,0.12); color: #f87171; }
+.b-refunded  { background: rgba(167,139,250,0.12); color: #a78bfa; }
+.btn-refund  { padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(248,113,113,0.3); background: transparent; color: #f87171; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
+.btn-refund:hover { background: rgba(248,113,113,0.1); }
 .disc-tag { display: inline-block; padding: 1px 7px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; background: rgba(251,191,36,0.12); color: #fbbf24; margin-left: 5px; }
 .empty { color: #4a5a78; font-style: italic; font-size: 0.88rem; padding: 8px 0; }
 </style>
@@ -122,7 +125,7 @@ tr:last-child td { border: none; }
   {% if recent %}
   <table>
     <thead>
-      <tr><th>#</th><th>Time</th><th>Order</th><th>Total</th><th>Status</th></tr>
+      <tr><th>#</th><th>Time</th><th>Order</th><th>Total</th><th>Status</th><th></th></tr>
     </thead>
     <tbody>
     {% for r in recent %}
@@ -138,6 +141,11 @@ tr:last-child td { border: none; }
       </td>
       <td style="font-weight:800;white-space:nowrap">€{{ "%.2f"|format(r.total) }}</td>
       <td><span class="badge b-{{ r.status }}">{{ r.status }}</span></td>
+      <td>
+        {% if r.status == 'succeeded' %}
+        <button class="btn-refund" onclick="doRefund('{{ r.pi_id }}', this)">Refund</button>
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
     </tbody>
@@ -147,5 +155,22 @@ tr:last-child td { border: none; }
   {% endif %}
 </div>
 
+<script>
+async function doRefund(piId, btn) {
+  if (!confirm('Refund this transaction? This cannot be undone.')) return;
+  btn.disabled = true;
+  btn.textContent = '…';
+  const res = await fetch('/refund/' + piId, { method: 'POST' });
+  const data = await res.json();
+  if (data.status === 'refunded') {
+    btn.closest('tr').querySelector('.badge').className = 'badge b-refunded';
+    btn.closest('tr').querySelector('.badge').textContent = 'refunded';
+    btn.remove();
+  } else {
+    btn.textContent = 'Error';
+    alert(data.error || 'Refund failed');
+  }
+}
+</script>
 </body>
 </html>

@@ -145,6 +145,19 @@ def void_order():
     return jsonify(status="voided", ref=ref)
 
 
+@app.route("/refund/<pi_id>", methods=["POST"])
+@require_admin
+def refund(pi_id):
+    try:
+        stripe.Refund.create(payment_intent=pi_id)
+        db = get_db()
+        db.execute("UPDATE orders SET status='refunded' WHERE payment_intent_id=?", (pi_id,))
+        db.commit()
+        return jsonify(status="refunded")
+    except stripe.error.StripeError as e:
+        return jsonify(error=str(e)), 400
+
+
 @app.route("/status/<pi_id>")
 def status(pi_id):
     intent = stripe.PaymentIntent.retrieve(pi_id)
@@ -222,6 +235,7 @@ def rapport():
             "total":    r["total_cents"] / 100,
             "email":    r["customer_email"] or "",
             "status":   r["status"],
+            "pi_id":    r["payment_intent_id"] or "",
         })
 
     d = date.fromisoformat(date_str)
