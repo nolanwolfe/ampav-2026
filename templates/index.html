@@ -315,6 +315,22 @@
   </div>
 </div>
 
+<div class="overlay" id="charcuterieOverlay" onclick="closeCharcuteriePicker()"></div>
+<div class="wine-picker" id="charcuteriePicker">
+  <div class="handle"></div>
+  <h3>Charcuterie Board</h3>
+  <div class="wine-opts">
+    <div class="wine-opt" onclick="addCharcuterie('small')">
+      <div class="wine-opt-label">Small</div>
+      <div class="wine-opt-price">€25</div>
+    </div>
+    <div class="wine-opt" onclick="addCharcuterie('large')">
+      <div class="wine-opt-label">Large</div>
+      <div class="wine-opt-price">€33</div>
+    </div>
+  </div>
+</div>
+
 <div class="status" id="statusScreen">
   <div id="sIcon" class="spin"></div>
   <div class="s-title" id="sTitle">Waiting for card…</div>
@@ -343,6 +359,7 @@ const WINE_BASES = [
   { name: 'Still Red Wine',  glass: 'still_red_glass',      bottle: 'still_red_bottle' },
 ];
 const WINE_IDS = new Set(WINE_BASES.flatMap(w => [w.glass, w.bottle]));
+const CHARCUTERIE_IDS = new Set(['charcuterie_small', 'charcuterie_large']);
 
 let cart           = {};
 let modifier       = null;
@@ -377,7 +394,14 @@ function buildGrid() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
   if (activeMenu === 'cuisine') {
-    CUISINE_ITEMS.forEach(item => addItemCard(item, grid));
+    let charcuterieRendered = false;
+    CUISINE_ITEMS.forEach(item => {
+      if (CHARCUTERIE_IDS.has(item.id)) {
+        if (!charcuterieRendered) { addCharcuterieCard(grid); charcuterieRendered = true; }
+      } else {
+        addItemCard(item, grid);
+      }
+    });
   } else {
     let lastCat = null;
     let wineRendered = false;
@@ -438,6 +462,35 @@ function addWine(size) {
   const item = ALL_ITEMS.find(i => i.id === wineTarget[size]);
   if (item) add(item);
   closeWinePicker();
+}
+
+function addCharcuterieCard(grid) {
+  const el = document.createElement('div');
+  el.className = 'item';
+  el.id = 'charcuteriecard';
+  el.innerHTML = `
+    <div class="item-name">Charcuterie Board</div>
+    <div class="item-price">Small · Large</div>
+  `;
+  el.onclick = () => openCharcuteriePicker();
+  grid.appendChild(el);
+}
+
+function openCharcuteriePicker() {
+  document.getElementById('charcuterieOverlay').className = 'overlay show';
+  document.getElementById('charcuteriePicker').className  = 'wine-picker show';
+}
+
+function closeCharcuteriePicker() {
+  document.getElementById('charcuterieOverlay').className = 'overlay';
+  document.getElementById('charcuteriePicker').className  = 'wine-picker';
+}
+
+function addCharcuterie(size) {
+  const id = size === 'small' ? 'charcuterie_small' : 'charcuterie_large';
+  const item = ALL_ITEMS.find(i => i.id === id);
+  if (item) add(item);
+  closeCharcuteriePicker();
 }
 
 function addItemCard(item, grid) {
@@ -504,7 +557,7 @@ function refresh() {
 
   // badges
   ALL_ITEMS.forEach(item => {
-    if (WINE_IDS.has(item.id)) return;
+    if (WINE_IDS.has(item.id) || CHARCUTERIE_IDS.has(item.id)) return;
     const q     = cart[item.id]?.qty || 0;
     const badge = document.getElementById('badge_' + item.id);
     const card  = document.getElementById('item_'  + item.id);
