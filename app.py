@@ -20,8 +20,9 @@ READERS = {
 }
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "petitechef")
 BASE_URL = os.environ.get("BASE_URL", "")
-DB_PATH = os.path.join(os.path.dirname(__file__), "sales.db")
-MENU_PATH = os.path.join(os.path.dirname(__file__), "menu.json")
+DB_PATH      = os.path.join(os.path.dirname(__file__), "sales.db")
+MENU_PATH    = os.path.join(os.path.dirname(__file__), "menu.json")
+VERSION_PATH = os.path.join(os.path.dirname(__file__), "VERSION")
 
 app = Flask(__name__)
 
@@ -80,11 +81,14 @@ def require_admin(f):
 def index():
     with open(MENU_PATH) as f:
         menu = json.load(f)
+    with open(VERSION_PATH) as f:
+        version = f.read().strip()
     return render_template("index.html",
         cuisine_items=menu.get("cuisine", []),
         bar_items=menu.get("bar", []),
         readers=READERS,
         base_url=BASE_URL,
+        version=version,
     )
 
 
