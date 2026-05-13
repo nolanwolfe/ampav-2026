@@ -271,7 +271,6 @@
   <div class="mod-label">Modifiers</div>
   <div class="mods">
     <div class="mod" id="mod-s20"  onclick="toggleMod('student20')">Student Discount<br>20% off</div>
-    <div class="mod" id="mod-dos"  onclick="toggleMod('dayold')">Day Old Sandwich<br>50% off</div>
     <div class="mod" id="mod-void" onclick="toggleMod('void')">Staff Void<br>€0.00</div>
   </div>
 
@@ -378,7 +377,6 @@ function selectReader(key) {
 
 const MODS = {
   student20: { label: 'Student Discount 20%', pct: 0.20, cls: 'active-blue',  el: 'mod-s20'  },
-  dayold:    { label: 'Day Old Sandwich 50%', pct: 0.50, cls: 'active-amber', el: 'mod-dos'  },
   void:      { label: 'Staff Void',           pct: 1.00, cls: 'active-red',   el: 'mod-void' },
 };
 
