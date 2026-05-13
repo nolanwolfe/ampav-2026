@@ -272,6 +272,8 @@ def rapport():
     prev_date = (d - timedelta(days=1)).isoformat()
     next_date = (d + timedelta(days=1)).isoformat()
 
+    with open(VERSION_PATH) as f:
+        version = f.read().strip()
     return render_template("rapport.html",
         selected_date=date_str,
         prev_date=prev_date,
@@ -285,6 +287,7 @@ def rapport():
         item_counts=item_counts,
         recent=recent,
         base_url=BASE_URL,
+        version=version,
     )
 
 
