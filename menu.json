@@ -19,7 +19,7 @@
     {"id": "mixed_nuts",               "name": "Mixed Nuts",                        "price": 2},
     {"id": "combo_side",                "name": "Combo Side",                        "price": 3},
     {"id": "olives",                    "name": "Olives",                            "price": 3},
-    {"id": "cookie",                    "name": "Cookie",                            "price": 3.25},
+    {"id": "cookie",                    "name": "Cookie",                            "price": 3.50},
     {"id": "chips",                     "name": "Chips",                             "price": 4}
   ],
   "bar": [
