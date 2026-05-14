@@ -302,7 +302,6 @@ def rapport():
 
 
 @app.route("/export.csv")
-@require_admin
 def export_csv():
     db = get_db()
     rows = db.execute(
