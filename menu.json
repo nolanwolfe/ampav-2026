@@ -17,6 +17,7 @@
     {"id": "charcuterie_small",         "name": "Charcuterie Board · Small",         "price": 25},
     {"id": "charcuterie_large",         "name": "Charcuterie Board · Large",         "price": 33},
     {"id": "mixed_nuts",               "name": "Mixed Nuts",                        "price": 2},
+    {"id": "combo_side",                "name": "Combo Side",                        "price": 3},
     {"id": "cookie",                    "name": "Cookie",                            "price": 4},
     {"id": "chips",                     "name": "Chips",                             "price": 5}
   ],
