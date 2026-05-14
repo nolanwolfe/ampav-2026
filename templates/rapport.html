@@ -173,7 +173,11 @@ tr:last-child td { border: none; }
 {% if is_today %}
 (function() {
   let knownCount = {{ count }};
+  let paused = false;
+  document.addEventListener('focusin',  () => { paused = true; });
+  document.addEventListener('focusout', () => { paused = false; });
   setInterval(async () => {
+    if (paused) return;
     try {
       const res  = await fetch('/rapport/poll?date={{ selected_date }}');
       const data = await res.json();
