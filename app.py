@@ -204,6 +204,16 @@ def cancel(pi_id):
 
 # ── Rapport ───────────────────────────────────────────────
 
+@app.route("/rapport/poll")
+def rapport_poll():
+    date_str = request.args.get('date', date.today().isoformat())
+    db = get_db()
+    row = db.execute(
+        "SELECT COUNT(*) cnt, COALESCE(SUM(total_cents),0) total FROM orders WHERE created_at LIKE ?",
+        (date_str + "%",),
+    ).fetchone()
+    return jsonify(count=row["cnt"], total=row["total"])
+
 @app.route("/rapport")
 def rapport():
     from datetime import timedelta

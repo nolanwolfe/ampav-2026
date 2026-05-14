@@ -170,6 +170,19 @@ tr:last-child td { border: none; }
 </div>
 
 <script>
+{% if is_today %}
+(function() {
+  let knownCount = {{ count }};
+  setInterval(async () => {
+    try {
+      const res  = await fetch('/rapport/poll?date={{ selected_date }}');
+      const data = await res.json();
+      if (data.count !== knownCount) { location.reload(); }
+    } catch(e) {}
+  }, 8000);
+})();
+{% endif %}
+
 function toggleReceipt(btn) {
   const form = btn.nextElementSibling;
   form.style.display = form.style.display === 'block' ? 'none' : 'block';
