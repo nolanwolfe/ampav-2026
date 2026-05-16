@@ -49,8 +49,6 @@
     background: transparent; color: var(--muted); transition: all 0.15s;
   }
   .tog.active { background: var(--blue); color: #000; }
-  #tog-queer_night { color: #a78bfa; }
-  #tog-queer_night.active { background: #a78bfa; color: #000; }
 
   /* ── Menu grid ── */
   .grid {
@@ -254,7 +252,7 @@
 <div class="menu-toggle">
   <button id="tog-cuisine"     class="tog active" onclick="switchMenu('cuisine')">Cuisine Menu</button>
   <button id="tog-bar"         class="tog"        onclick="switchMenu('bar')">Bar Menu</button>
-  <button id="tog-queer_night" class="tog"        onclick="switchMenu('queer_night')" style="background:rgba(167,139,250,0.15); color:#a78bfa; border-color:rgba(167,139,250,0.3);">Queer Night</button>
+  <button id="tog-queer_night" class="tog"        onclick="switchMenu('queer_night')">Queer Night</button>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -391,6 +389,9 @@ function switchMenu(menu) {
   document.getElementById('tog-cuisine').className     = 'tog' + (menu === 'cuisine'     ? ' active' : '');
   document.getElementById('tog-bar').className         = 'tog' + (menu === 'bar'         ? ' active' : '');
   document.getElementById('tog-queer_night').className = 'tog' + (menu === 'queer_night' ? ' active' : '');
+  const showMods = menu !== 'queer_night';
+  document.querySelector('.mod-label').style.display = showMods ? '' : 'none';
+  document.querySelector('.mods').style.display      = showMods ? '' : 'none';
   buildGrid();
   refresh();
 }
