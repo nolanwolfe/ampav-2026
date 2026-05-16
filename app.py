@@ -86,6 +86,7 @@ def index():
     return render_template("index.html",
         cuisine_items=menu.get("cuisine", []),
         bar_items=menu.get("bar", []),
+        queer_night_items=menu.get("queer_night", []),
         readers=READERS,
         base_url=BASE_URL,
         version=version,
@@ -112,6 +113,10 @@ def charge():
     item_line = ", ".join(f"{item['qty']}x {item['name']}" for item in items)
     description = f"{item_line}{' [' + discount_label + ']' if discount_label else ''}"
 
+    # Detect Queer Night items for party-pos webhook metadata
+    qn_packages = [item["package"] for item in items if item.get("package")]
+    qn_package = qn_packages[0] if len(set(qn_packages)) == 1 else ("bundle_5" if qn_packages else None)
+
     params = dict(
         amount=max(50, int(total_cents)),
         currency="eur",
@@ -121,6 +126,13 @@ def charge():
     )
     if email:
         params["receipt_email"] = email
+    if qn_package:
+        params["metadata"] = {
+            "source":  "terminal",
+            "package": qn_package,
+            "email":   email or "",
+            "name":    "Walk-in",
+        }
 
     intent = stripe.PaymentIntent.create(**params)
     stripe.terminal.Reader.process_payment_intent(reader_id, payment_intent=intent.id)

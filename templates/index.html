@@ -49,6 +49,8 @@
     background: transparent; color: var(--muted); transition: all 0.15s;
   }
   .tog.active { background: var(--blue); color: #000; }
+  #tog-queer_night { color: #a78bfa; }
+  #tog-queer_night.active { background: #a78bfa; color: #000; }
 
   /* ── Menu grid ── */
   .grid {
@@ -250,8 +252,9 @@
 </header>
 
 <div class="menu-toggle">
-  <button id="tog-cuisine" class="tog active" onclick="switchMenu('cuisine')">Cuisine Menu</button>
-  <button id="tog-bar"     class="tog"        onclick="switchMenu('bar')">Bar Menu</button>
+  <button id="tog-cuisine"     class="tog active" onclick="switchMenu('cuisine')">Cuisine Menu</button>
+  <button id="tog-bar"         class="tog"        onclick="switchMenu('bar')">Bar Menu</button>
+  <button id="tog-queer_night" class="tog"        onclick="switchMenu('queer_night')" style="background:rgba(167,139,250,0.15); color:#a78bfa; border-color:rgba(167,139,250,0.3);">Queer Night</button>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -340,10 +343,11 @@
 </div>
 
 <script>
-const CUISINE_ITEMS = {{ cuisine_items | tojson }};
-const BAR_ITEMS     = {{ bar_items | tojson }};
-const ALL_ITEMS     = [...CUISINE_ITEMS, ...BAR_ITEMS];
-const BASE          = '{{ base_url }}';
+const CUISINE_ITEMS     = {{ cuisine_items | tojson }};
+const BAR_ITEMS         = {{ bar_items | tojson }};
+const QUEER_NIGHT_ITEMS = {{ queer_night_items | tojson }};
+const ALL_ITEMS         = [...CUISINE_ITEMS, ...BAR_ITEMS, ...QUEER_NIGHT_ITEMS];
+const BASE              = '{{ base_url }}';
 
 const CAT_COLORS = {
   'COCKTAILS': { border: '#2d9d9d', bg: 'rgba(45,157,157,0.12)',  text: '#2d9d9d' },
@@ -384,8 +388,9 @@ const MODS = {
 
 function switchMenu(menu) {
   activeMenu = menu;
-  document.getElementById('tog-cuisine').className = 'tog' + (menu === 'cuisine' ? ' active' : '');
-  document.getElementById('tog-bar').className     = 'tog' + (menu === 'bar'     ? ' active' : '');
+  document.getElementById('tog-cuisine').className     = 'tog' + (menu === 'cuisine'     ? ' active' : '');
+  document.getElementById('tog-bar').className         = 'tog' + (menu === 'bar'         ? ' active' : '');
+  document.getElementById('tog-queer_night').className = 'tog' + (menu === 'queer_night' ? ' active' : '');
   buildGrid();
   refresh();
 }
@@ -393,7 +398,15 @@ function switchMenu(menu) {
 function buildGrid() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-  if (activeMenu === 'cuisine') {
+  if (activeMenu === 'queer_night') {
+    const hdr = document.createElement('div');
+    hdr.className = 'cat-header';
+    hdr.style.color      = '#a78bfa';
+    hdr.style.background = 'rgba(167,139,250,0.08)';
+    hdr.textContent = 'DAY-OF SALES';
+    grid.appendChild(hdr);
+    QUEER_NIGHT_ITEMS.forEach(item => addItemCard(item, grid));
+  } else if (activeMenu === 'cuisine') {
     let charcuterieRendered = false;
     CUISINE_ITEMS.forEach(item => {
       if (CHARCUTERIE_IDS.has(item.id)) {

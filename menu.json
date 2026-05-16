@@ -1,4 +1,8 @@
 {
+  "queer_night": [
+    {"id": "drink_ticket_1", "name": "1 Drink Ticket",   "price": 6,  "package": "single_1"},
+    {"id": "drink_ticket_5", "name": "5 Drink Tickets",  "price": 25, "package": "bundle_5"}
+  ],
   "cuisine": [
     {"id": "chicken_caesar_wrap",       "name": "Chicken Caesar Wrap",               "price": 15},
     {"id": "feta_grilled_veg",          "name": "Feta with Grilled Vegetable (V)",   "price": 15},
