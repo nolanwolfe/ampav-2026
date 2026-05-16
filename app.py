@@ -55,11 +55,13 @@ def init_db():
                 items          TEXT
             )
         """)
-        # Add discount_label column if upgrading from old DB
-        try:
-            db.execute("ALTER TABLE orders ADD COLUMN discount_label TEXT")
-        except Exception:
-            pass
+        # Add columns for upgrades from older DB versions
+        for col in ["ALTER TABLE orders ADD COLUMN discount_label TEXT",
+                    "ALTER TABLE orders ADD COLUMN source TEXT"]:
+            try:
+                db.execute(col)
+            except Exception:
+                pass
         db.commit()
 
 
@@ -139,8 +141,8 @@ def charge():
 
     db = get_db()
     db.execute(
-        "INSERT INTO orders (payment_intent_id, total_cents, discount_label, customer_email, items) VALUES (?,?,?,?,?)",
-        (intent.id, int(total_cents), discount_label, email, json.dumps(items)),
+        "INSERT INTO orders (payment_intent_id, total_cents, discount_label, customer_email, source, items) VALUES (?,?,?,?,?,?)",
+        (intent.id, int(total_cents), discount_label, email, "queer_night" if qn_package else None, json.dumps(items)),
     )
     db.commit()
 
@@ -221,7 +223,7 @@ def rapport_poll():
     date_str = request.args.get('date', date.today().isoformat())
     db = get_db()
     row = db.execute(
-        "SELECT COUNT(*) cnt, COALESCE(SUM(total_cents),0) total FROM orders WHERE created_at LIKE ?",
+        "SELECT COUNT(*) cnt, COALESCE(SUM(total_cents),0) total FROM orders WHERE (source IS NULL OR source != 'queer_night') AND created_at LIKE ?",
         (date_str + "%",),
     ).fetchone()
     return jsonify(count=row["cnt"], total=row["total"])
@@ -238,13 +240,13 @@ def rapport():
         date_str = date.today().isoformat()
 
     row = db.execute(
-        "SELECT COUNT(*) cnt, COALESCE(SUM(total_cents),0) total FROM orders WHERE status='succeeded' AND created_at LIKE ?",
+        "SELECT COUNT(*) cnt, COALESCE(SUM(total_cents),0) total FROM orders WHERE status='succeeded' AND (source IS NULL OR source != 'queer_night') AND created_at LIKE ?",
         (date_str + "%",),
     ).fetchone()
     count, total_cents = row["cnt"], row["total"]
 
     voided_today = db.execute(
-        "SELECT COUNT(*) cnt FROM orders WHERE status='voided' AND created_at LIKE ?",
+        "SELECT COUNT(*) cnt FROM orders WHERE status='voided' AND (source IS NULL OR source != 'queer_night') AND created_at LIKE ?",
         (date_str + "%",),
     ).fetchone()["cnt"]
 
@@ -256,7 +258,7 @@ def rapport():
     item_counts = {}
     cuisine_counts = {}
     bar_counts = {}
-    for r in db.execute("SELECT items FROM orders WHERE status='succeeded' AND created_at LIKE ?", (date_str + "%",)):
+    for r in db.execute("SELECT items FROM orders WHERE status='succeeded' AND (source IS NULL OR source != 'queer_night') AND created_at LIKE ?", (date_str + "%",)):
         for item in json.loads(r["items"]):
             key = item["name"]
             iid = item.get("id", "")
@@ -274,7 +276,7 @@ def rapport():
 
     recent = []
     for r in db.execute(
-        "SELECT id, payment_intent_id, created_at, total_cents, discount_label, customer_email, status, items FROM orders WHERE created_at LIKE ? ORDER BY id DESC",
+        "SELECT id, payment_intent_id, created_at, total_cents, discount_label, customer_email, status, items FROM orders WHERE (source IS NULL OR source != 'queer_night') AND created_at LIKE ? ORDER BY id DESC",
         (date_str + "%",),
     ):
         lines = [{"name": i["name"], "qty": i["qty"], "price": i["price"]} for i in json.loads(r["items"])]
@@ -317,7 +319,7 @@ def rapport():
 def export_csv():
     db = get_db()
     rows = db.execute(
-        "SELECT id, created_at, total_cents, discount_label, customer_email, status, items FROM orders ORDER BY id DESC"
+        "SELECT id, created_at, total_cents, discount_label, customer_email, status, items FROM orders WHERE (source IS NULL OR source != 'queer_night') ORDER BY id DESC"
     ).fetchall()
     buf = io.StringIO()
     w = csv.writer(buf)
