@@ -333,6 +333,20 @@
   </div>
 </div>
 
+<div class="overlay" id="nameOverlay"></div>
+<div class="wine-picker" id="namePicker" style="padding:24px 20px 28px;">
+  <div class="handle"></div>
+  <h3 style="margin-bottom:16px; font-size:0.9rem; letter-spacing:0.06em; text-transform:uppercase; color:#a78bfa;">Guest Name</h3>
+  <input id="nameFirst" type="text" placeholder="First name" autocomplete="given-name"
+    style="width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(255,255,255,0.1); background:#060c15; color:#e8f0fe; font-size:0.95rem; margin-bottom:10px;">
+  <input id="nameLast" type="text" placeholder="Last name" autocomplete="family-name"
+    style="width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(255,255,255,0.1); background:#060c15; color:#e8f0fe; font-size:0.95rem; margin-bottom:16px;">
+  <button onclick="submitName()"
+    style="width:100%; padding:12px; border-radius:9px; border:none; background:#a78bfa; color:#000; font-size:0.95rem; font-weight:800; cursor:pointer;">
+    Continue to Payment →
+  </button>
+</div>
+
 <div class="status" id="statusScreen">
   <div id="sIcon" class="spin"></div>
   <div class="s-title" id="sTitle">Waiting for card…</div>
@@ -625,7 +639,31 @@ function getTotal() {
   return modifier === 'void' ? 0 : subtotal * (1 - discountPct);
 }
 
-async function doCharge() {
+function doCharge() {
+  if (activeMenu === 'queer_night') {
+    document.getElementById('nameFirst').value = '';
+    document.getElementById('nameLast').value  = '';
+    document.getElementById('nameOverlay').className = 'overlay show';
+    document.getElementById('namePicker').className  = 'wine-picker show';
+    setTimeout(() => document.getElementById('nameFirst').focus(), 300);
+    return;
+  }
+  submitCharge(null);
+}
+
+function submitName() {
+  const first = document.getElementById('nameFirst').value.trim();
+  const last  = document.getElementById('nameLast').value.trim();
+  if (!first || !last) {
+    document.getElementById(first ? 'nameLast' : 'nameFirst').focus();
+    return;
+  }
+  document.getElementById('nameOverlay').className = 'overlay';
+  document.getElementById('namePicker').className  = 'wine-picker';
+  submitCharge(first + ' ' + last);
+}
+
+async function submitCharge(customerName) {
   const items = Object.entries(cart).map(([id,v]) => ({ id, name: v.name, price: v.price, qty: v.qty, ...(v.package ? { package: v.package } : {}) }));
   const email = document.getElementById('email').value.trim();
   const total_cents = Math.round(getTotal() * 100);
@@ -639,7 +677,7 @@ async function doCharge() {
     const res = await fetch(BASE + '/charge', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items, email, total_cents, discount_label, reader_key: selectedReader }),
+      body: JSON.stringify({ items, email, total_cents, discount_label, reader_key: selectedReader, customer_name: customerName }),
     });
     const data = await res.json();
     if (data.error) { showStatus('fail', data.error); return; }

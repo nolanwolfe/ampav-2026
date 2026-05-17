@@ -104,6 +104,7 @@ def charge():
     email = data.get("email", "").strip() or None
     discount_label = data.get("discount_label") or None
     total_cents = data.get("total_cents")
+    customer_name = data.get("customer_name", "").strip() or None
     reader_key = data.get("reader_key", "r1")
 
     reader_id = READERS.get(reader_key, {}).get("id") or READER_ID
@@ -135,7 +136,7 @@ def charge():
             "source":  "terminal",
             "package": qn_package,
             "email":   email or "",
-            "name":    "Walk-in",
+            "name":    customer_name or "Walk-in",
         }
 
     intent = stripe.PaymentIntent.create(**params)
