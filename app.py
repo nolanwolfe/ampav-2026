@@ -104,7 +104,7 @@ def charge():
     email = data.get("email", "").strip() or None
     discount_label = data.get("discount_label") or None
     total_cents = data.get("total_cents")
-    customer_name = data.get("customer_name", "").strip() or None
+    customer_name = (data.get("customer_name") or "").strip() or None
     reader_key = data.get("reader_key", "r1")
 
     reader_id = READERS.get(reader_key, {}).get("id") or READER_ID
