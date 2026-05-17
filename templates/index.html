@@ -530,7 +530,7 @@ function add(item) {
   if (cart[item.id] && cart[item.id].qty > 0) {
     delete cart[item.id];
   } else {
-    cart[item.id] = { name: item.name, price: item.price, qty: 1 };
+    cart[item.id] = { name: item.name, price: item.price, qty: 1, ...(item.package ? { package: item.package } : {}) };
   }
   refresh();
 }
@@ -626,7 +626,7 @@ function getTotal() {
 }
 
 async function doCharge() {
-  const items = Object.entries(cart).map(([id,v]) => ({ id, name: v.name, price: v.price, qty: v.qty }));
+  const items = Object.entries(cart).map(([id,v]) => ({ id, name: v.name, price: v.price, qty: v.qty, ...(v.package ? { package: v.package } : {}) }));
   const email = document.getElementById('email').value.trim();
   const total_cents = Math.round(getTotal() * 100);
   const discount_label = modifier ? MODS[modifier].label : null;
@@ -653,7 +653,7 @@ async function doCharge() {
 }
 
 async function doVoid() {
-  const items = Object.entries(cart).map(([id,v]) => ({ id, name: v.name, price: v.price, qty: v.qty }));
+  const items = Object.entries(cart).map(([id,v]) => ({ id, name: v.name, price: v.price, qty: v.qty, ...(v.package ? { package: v.package } : {}) }));
   closeSheet();
   await fetch(BASE + '/void', {
     method: 'POST',
