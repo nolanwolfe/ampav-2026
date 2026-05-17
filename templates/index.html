@@ -754,7 +754,9 @@ function hideStatus() {
 
 function reset() {
   cart = {}; currentPI = null; modifier = null;
-  document.getElementById('email').value = '';
+  document.getElementById('email').value      = '';
+  document.getElementById('guestFirst').value = '';
+  document.getElementById('guestLast').value  = '';
   Object.values(MODS).forEach(m => { document.getElementById(m.el).className = 'mod'; });
   refresh(); renderLines();
 }
