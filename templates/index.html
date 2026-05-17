@@ -277,6 +277,14 @@
     <div class="mod" id="mod-void" onclick="toggleMod('void')">Staff Void<br>€0.00</div>
   </div>
 
+  <div id="guest-name-wrap" style="display:none; margin-bottom:12px;">
+    <div class="mod-label">Guest Name</div>
+    <input id="guestFirst" type="text" placeholder="First name" autocomplete="off"
+      style="width:100%; padding:9px 12px; border-radius:9px; border:1px solid rgba(255,255,255,0.1); background:#060c15; color:#e8f0fe; font-size:0.88rem; margin-bottom:7px;">
+    <input id="guestLast" type="text" placeholder="Last name" autocomplete="off"
+      style="width:100%; padding:9px 12px; border-radius:9px; border:1px solid rgba(255,255,255,0.1); background:#060c15; color:#e8f0fe; font-size:0.88rem;">
+  </div>
+
   <hr class="divider">
   <div class="subtotal-row" id="subtotalRow" style="display:none"><span>Subtotal</span><span id="subtotalAmt"></span></div>
   <div class="discount-row" id="discountRow" style="display:none"><span id="discountLabel"></span><span id="discountAmt"></span></div>
@@ -333,19 +341,6 @@
   </div>
 </div>
 
-<div class="overlay" id="nameOverlay"></div>
-<div class="wine-picker" id="namePicker" style="padding:24px 20px 28px;">
-  <div class="handle"></div>
-  <h3 style="margin-bottom:16px; font-size:0.9rem; letter-spacing:0.06em; text-transform:uppercase; color:#a78bfa;">Guest Name</h3>
-  <input id="nameFirst" type="text" placeholder="First name" autocomplete="given-name"
-    style="width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(255,255,255,0.1); background:#060c15; color:#e8f0fe; font-size:0.95rem; margin-bottom:10px;">
-  <input id="nameLast" type="text" placeholder="Last name" autocomplete="family-name"
-    style="width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(255,255,255,0.1); background:#060c15; color:#e8f0fe; font-size:0.95rem; margin-bottom:16px;">
-  <button onclick="submitName()"
-    style="width:100%; padding:12px; border-radius:9px; border:none; background:#a78bfa; color:#000; font-size:0.95rem; font-weight:800; cursor:pointer;">
-    Continue to Payment →
-  </button>
-</div>
 
 <div class="status" id="statusScreen">
   <div id="sIcon" class="spin"></div>
@@ -404,8 +399,9 @@ function switchMenu(menu) {
   document.getElementById('tog-bar').className         = 'tog' + (menu === 'bar'         ? ' active' : '');
   document.getElementById('tog-queer_night').className = 'tog' + (menu === 'queer_night' ? ' active' : '');
   const showMods = menu !== 'queer_night';
-  document.querySelector('.mod-label').style.display = showMods ? '' : 'none';
-  document.querySelector('.mods').style.display      = showMods ? '' : 'none';
+  document.querySelector('.mod-label').style.display        = showMods ? '' : 'none';
+  document.querySelector('.mods').style.display             = showMods ? '' : 'none';
+  document.getElementById('guest-name-wrap').style.display  = showMods ? 'none' : '';
   buildGrid();
   refresh();
 }
@@ -640,27 +636,17 @@ function getTotal() {
 }
 
 function doCharge() {
+  let customerName = null;
   if (activeMenu === 'queer_night') {
-    document.getElementById('nameFirst').value = '';
-    document.getElementById('nameLast').value  = '';
-    document.getElementById('nameOverlay').className = 'overlay show';
-    document.getElementById('namePicker').className  = 'wine-picker show';
-    setTimeout(() => document.getElementById('nameFirst').focus(), 300);
-    return;
+    const first = document.getElementById('guestFirst').value.trim();
+    const last  = document.getElementById('guestLast').value.trim();
+    if (!first || !last) {
+      document.getElementById(first ? 'guestLast' : 'guestFirst').focus();
+      return;
+    }
+    customerName = first + ' ' + last;
   }
-  submitCharge(null);
-}
-
-function submitName() {
-  const first = document.getElementById('nameFirst').value.trim();
-  const last  = document.getElementById('nameLast').value.trim();
-  if (!first || !last) {
-    document.getElementById(first ? 'nameLast' : 'nameFirst').focus();
-    return;
-  }
-  document.getElementById('nameOverlay').className = 'overlay';
-  document.getElementById('namePicker').className  = 'wine-picker';
-  submitCharge(first + ' ' + last);
+  submitCharge(customerName);
 }
 
 async function submitCharge(customerName) {
