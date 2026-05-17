@@ -57,7 +57,9 @@ def init_db():
         """)
         # Add columns for upgrades from older DB versions
         for col in ["ALTER TABLE orders ADD COLUMN discount_label TEXT",
-                    "ALTER TABLE orders ADD COLUMN source TEXT"]:
+                    "ALTER TABLE orders ADD COLUMN source TEXT",
+                    "ALTER TABLE orders ADD COLUMN last4 TEXT",
+                    "ALTER TABLE orders ADD COLUMN cardholder_name TEXT"]:
             try:
                 db.execute(col)
             except Exception:
@@ -192,10 +194,21 @@ def send_receipt(pi_id):
 
 @app.route("/status/<pi_id>")
 def status(pi_id):
-    intent = stripe.PaymentIntent.retrieve(pi_id)
+    db = get_db()
+    intent = stripe.PaymentIntent.retrieve(pi_id, expand=["latest_charge"])
     if intent.status in ("succeeded", "canceled", "failed"):
-        db = get_db()
-        db.execute("UPDATE orders SET status=? WHERE payment_intent_id=?", (intent.status, pi_id))
+        order = db.execute("SELECT source FROM orders WHERE payment_intent_id=?", (pi_id,)).fetchone()
+        if intent.status == "succeeded" and order and order["source"] == "queer_night":
+            charge = intent.latest_charge
+            cpd = charge and charge.payment_method_details and charge.payment_method_details.get("card_present", {})
+            last4 = cpd.get("last4") if cpd else None
+            cardholder_name = cpd.get("cardholder_name") if cpd else None
+            db.execute(
+                "UPDATE orders SET status=?, last4=?, cardholder_name=? WHERE payment_intent_id=?",
+                (intent.status, last4, cardholder_name, pi_id),
+            )
+        else:
+            db.execute("UPDATE orders SET status=? WHERE payment_intent_id=?", (intent.status, pi_id))
         db.commit()
     return jsonify(intent_status=intent.status)
 
